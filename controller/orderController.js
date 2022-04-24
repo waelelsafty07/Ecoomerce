@@ -169,6 +169,7 @@ exports.webhookCheckout = asyncHandler(async (req, res, next) => {
       process.env.STRIPE_END_POINT
     );
   } catch (err) {
+    console.error(err);
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
   if (event.type === "checkout.session.completed") {
