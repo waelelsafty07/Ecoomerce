@@ -10,6 +10,7 @@ const dbConnection = require("./config/database");
 
 const ApiError = require("./utils/apiErorr");
 const globalError = require("./middlewares/errorMiddelware");
+const { webhookCheckout } = require("./controller/orderController");
 // Routes
 const mountRoutes = require("./routes");
 
@@ -21,6 +22,7 @@ const app = express();
 app.use(cors());
 app.options("*", cors());
 app.use(compression());
+
 app.use(express.static(path.join(__dirname, "uploads")));
 if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
@@ -32,6 +34,13 @@ if (process.env.NODE_ENV === "development") {
 app.use(express.json());
 
 // Mount Routes
+// eslint-disable-next-line no-unused-expressions
+
+app.post(
+  "/webhook-checkout",
+  express.raw({ type: "application/json" }, webhookCheckout)
+);
+
 mountRoutes(app);
 
 app.all("*", (req, res, next) => {
