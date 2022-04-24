@@ -20,7 +20,7 @@ dbConnection();
 const app = express();
 app.use(cors());
 app.options("*", cors());
-app.compression();
+app.use(compression());
 app.use(express.static(path.join(__dirname, "uploads")));
 if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
