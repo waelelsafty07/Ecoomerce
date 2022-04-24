@@ -22,6 +22,11 @@ const app = express();
 app.use(cors());
 app.options("*", cors());
 app.use(compression());
+app.post(
+  "/webhook-checkout",
+  express.raw({ type: "application/json" }),
+  webhookCheckout
+);
 
 app.use(express.static(path.join(__dirname, "uploads")));
 if (process.env.NODE_ENV === "development") {
@@ -35,11 +40,6 @@ app.use(express.json());
 
 // Mount Routes
 // eslint-disable-next-line no-unused-expressions
-
-app.post(
-  "/webhook-checkout",
-  express.raw({ type: "application/json" }, webhookCheckout)
-);
 
 mountRoutes(app);
 
