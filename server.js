@@ -1,16 +1,18 @@
 const path = require("path");
 
 const express = require("express");
+const cookieParser = require("cookie-parser");
+
 const dotenv = require("dotenv");
 const morgan = require("morgan");
-const cors = require("cors");
-const compression = require("compression");
+
+const csrf = require("csurf");
 
 const dbConnection = require("./config/database");
 
 const ApiError = require("./utils/apiErorr");
 const globalError = require("./middlewares/errorMiddelware");
-const { webhookCheckout } = require("./controller/orderController");
+const appSecuirty = require("./utils/appSecuirty");
 // Routes
 const mountRoutes = require("./routes");
 
@@ -19,16 +21,13 @@ dotenv.config();
 dbConnection();
 
 const app = express();
-app.use(cors());
-app.options("*", cors());
-app.use(compression());
-app.post(
-  "/webhook-checkout",
-  express.raw({ type: "application/json" }),
-  webhookCheckout
-);
+// All app secuirty  function
+appSecuirty(app);
+
+// serve static files images in path /uploads
 
 app.use(express.static(path.join(__dirname, "uploads")));
+
 if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
   console.log(`mode:${process.env.NODE_ENV}`);
@@ -36,12 +35,22 @@ if (process.env.NODE_ENV === "development") {
 }
 
 // Middlewares
-app.use(express.json());
+app.use(
+  express.json({
+    limit: "20kb",
+  })
+);
+const csrfProtection = csrf({ cookie: true });
 
+app.use(cookieParser());
+app.use("/api/v1/auth", csrfProtection);
+app.get("/form", csrfProtection, (req, res) => {
+  // pass the csrfToken to the view
+  res.send(req.csrfToken());
+});
 // Mount Routes
-// eslint-disable-next-line no-unused-expressions
 
-mountRoutes(app);
+mountRoutes(app, express);
 
 app.all("*", (req, res, next) => {
   // Create Error and send it to error handler

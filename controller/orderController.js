@@ -12,6 +12,21 @@ const Product = require("../model/productModel");
 const Cart = require("../model/cartModel");
 const Order = require("../model/orderModel");
 
+// After creating order, decrement product quantity, increment product sold
+const afterCreateOrder = async (order, cart, cartId) => {
+  if (order) {
+    const bulkOption = cart.cartItems.map((item) => ({
+      updateOne: {
+        filter: { _id: item.product },
+        update: { $inc: { quantity: -item.quantity, sold: +item.quantity } },
+      },
+    }));
+    await Product.bulkWrite(bulkOption, {});
+
+    // 5) Clear cart depend on cartId
+    await Cart.findByIdAndDelete(cartId);
+  }
+};
 // console.log(process.env.BASE_URL);
 // @desc    create cash order
 // @route   POST /api/v1/orders/cartId
@@ -37,15 +52,8 @@ exports.createCashOrder = asyncHandler(async (req, res, next) => {
     totalOrderPrice,
   });
   // inc sold and decrease quantity
-  const bulkOptions = cart.cartItems.map((item) => ({
-    updateOne: {
-      filter: { _id: item.product },
-      update: { $inc: { quantity: -item.quantity, sold: +item.quantity } },
-    },
-  }));
-  await Product.bulkWrite(bulkOptions, bulkOptions);
-  // clear cart
-  await Cart.findByIdAndDelete(req.params.cartId);
+  afterCreateOrder(order, cart, req.params.cartId);
+
   res.status(201).json({ status: "success", data: order });
 });
 
@@ -157,8 +165,30 @@ exports.checkoutSession = asyncHandler(async (req, res, next) => {
   res.status(200).json({ status: "success", session });
 });
 
+// Create Card Order function
+const createCardOrder = async (session) => {
+  const cartId = session.client_reference_id;
+  const shippingAddress = session.metadata;
+  const oderPrice = session.amount_total / 100;
+
+  const cart = await Cart.findById(cartId);
+  const user = await User.findOne({ email: session.customer_email });
+
+  // 3) Create order with default paymentMethodType card
+  const order = await Order.create({
+    user: user._id,
+    cartItems: cart.cartItems,
+    shippingAddress,
+    totalOrderPrice: oderPrice,
+    isPaid: true,
+    paidAt: Date.now(),
+    paymentMethodType: "card",
+  });
+
+  // 4) After creating order, decrement product quantity, increment product sold
+  afterCreateOrder(order, cart, cartId);
+};
 exports.webhookCheckout = asyncHandler(async (req, res, next) => {
-  console.log(process.env.STRIPE_END_POINT);
   const sig = req.headers["stripe-signature"];
 
   let event;
@@ -170,12 +200,10 @@ exports.webhookCheckout = asyncHandler(async (req, res, next) => {
       process.env.STRIPE_END_POINT
     );
   } catch (err) {
-    console.error(err);
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
   if (event.type === "checkout.session.completed") {
-    console.log("create order here");
-  } else {
-    console.log("failed");
+    createCardOrder(event.data.object);
   }
+  res.status(200).json({ received: true });
 });
