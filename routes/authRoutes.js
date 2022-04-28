@@ -21,6 +21,6 @@ router.post("/signup", signUpValidator, signup);
 router.post("/login", loginValidator, login);
 router.post("/forgotPassword", forgotPasswordValidator, forgotPassword);
 router.post("/verifyResetCode", verifyResetCodeValidator, verifyPassResetCode);
-router.post("/resetPassword", protect, resetPasswordValidator, resetPassword);
+router.put("/resetPassword", protect, resetPasswordValidator, resetPassword);
 
 module.exports = router;
