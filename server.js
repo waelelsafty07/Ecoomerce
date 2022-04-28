@@ -5,6 +5,7 @@ const cookieParser = require("cookie-parser");
 
 const dotenv = require("dotenv");
 const morgan = require("morgan");
+const rateLimit = require("express-rate-limit");
 
 const csrf = require("csurf");
 
@@ -13,6 +14,7 @@ const dbConnection = require("./config/database");
 const ApiError = require("./utils/apiErorr");
 const globalError = require("./middlewares/errorMiddelware");
 const appSecuirty = require("./utils/appSecuirty");
+const { webhookCheckout } = require("./controller/orderController");
 // Routes
 const mountRoutes = require("./routes");
 
@@ -40,6 +42,20 @@ app.use(
     limit: "20kb",
   })
 );
+
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes)
+  message:
+    "Too many accounts created from this IP, please try again after an hour",
+});
+app.use("/api", limiter);
+app.post(
+  "/webhook-checkout",
+  express.raw({ type: "application/json" }),
+  webhookCheckout
+);
+
 const csrfProtection = csrf({ cookie: true });
 
 app.use(cookieParser());

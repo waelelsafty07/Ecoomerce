@@ -188,6 +188,7 @@ const createCardOrder = async (session) => {
   // 4) After creating order, decrement product quantity, increment product sold
   afterCreateOrder(order, cart, cartId);
 };
+
 exports.webhookCheckout = asyncHandler(async (req, res, next) => {
   const sig = req.headers["stripe-signature"];
 
