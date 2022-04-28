@@ -190,6 +190,7 @@ const createCardOrder = async (session) => {
 };
 
 exports.webhookCheckout = asyncHandler(async (req, res, next) => {
+  console.log(process.env.STRIPE_END_POINT);
   const sig = req.headers["stripe-signature"];
 
   let event;

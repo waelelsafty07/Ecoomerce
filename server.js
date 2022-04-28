@@ -35,6 +35,11 @@ if (process.env.NODE_ENV === "development") {
   console.log(`mode:${process.env.NODE_ENV}`);
   console.log(`mode:${process.env.BASE_URL}`);
 }
+app.post(
+  "/webhook-checkout",
+  express.raw({ type: "application/json" }),
+  webhookCheckout
+);
 
 // Middlewares
 app.use(
@@ -50,11 +55,6 @@ const limiter = rateLimit({
     "Too many accounts created from this IP, please try again after an hour",
 });
 app.use("/api", limiter);
-app.post(
-  "/webhook-checkout",
-  express.raw({ type: "application/json" }),
-  webhookCheckout
-);
 
 const csrfProtection = csrf({ cookie: true });
 
