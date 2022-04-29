@@ -56,14 +56,14 @@ const limiter = rateLimit({
 });
 app.use("/api", limiter);
 
-const csrfProtection = csrf({ cookie: true });
+// const csrfProtection = csrf({ cookie: true });
 
-app.use(cookieParser());
-app.use("/api/v1/auth", csrfProtection);
-app.get("/form", csrfProtection, (req, res) => {
-  // pass the csrfToken to the view
-  res.send(req.csrfToken());
-});
+// app.use(cookieParser());
+// app.use("/api/v1/auth", csrfProtection);
+// app.get("/form", csrfProtection, (req, res) => {
+//   // pass the csrfToken to the view
+//   res.send(req.csrfToken());
+// });
 // Mount Routes
 
 mountRoutes(app, express);
