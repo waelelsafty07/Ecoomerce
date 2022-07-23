@@ -37,7 +37,7 @@ exports.login = asyncHandler(async (req, res, next) => {
     "+password"
   );
   if (!user || !(await bcrypt.compare(req.body.password, user.password))) {
-    return next(new ApiError("Incorrect email or password", 401));
+    return next(new ApiError("Incorrect email or password", 404));
   }
   if (!user.active) {
     return next(new ApiError("Account not active", 401));

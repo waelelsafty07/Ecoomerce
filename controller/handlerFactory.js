@@ -41,7 +41,7 @@ exports.getOne = (Model, populateOpt) =>
     }
     const document = await query;
     if (!document) {
-      return next(new ApiError(`No Document for this id ${id}`, 400));
+      return next(new ApiError(`No Document for this id ${id}`, 404));
     }
     res.status(200).json({ data: document });
   });
