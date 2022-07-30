@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
+const crypto = require("crypto");
 
 const userSchema = new mongoose.Schema(
   {
@@ -27,7 +28,15 @@ const userSchema = new mongoose.Schema(
       minlength: [6, "Too short password"],
       select: false,
     },
+    emailVerificationToken: String,
+    emailVerificationExpire: Date,
+    emailVerificationVerified: {
+      type: Boolean,
+      default: false,
+    },
+
     passwordChangedAt: Date,
+
     passwordResetCode: String,
     passwordResetExpires: Date,
     passwordResetVerified: Boolean,
@@ -36,10 +45,7 @@ const userSchema = new mongoose.Schema(
       enum: ["user", "manager", "admin"],
       default: "user",
     },
-    active: {
-      type: Boolean,
-      default: true,
-    },
+
     wishlist: [
       {
         type: mongoose.Schema.ObjectId,
@@ -67,6 +73,20 @@ userSchema.pre("save", async function (next) {
   next();
 });
 
+userSchema.methods.createVerificationToken = function () {
+  const verificationToken = crypto.randomBytes(32).toString("hex");
+
+  this.emailVerificationToken = crypto
+    .createHash("sha256")
+    .update(verificationToken)
+    .digest("hex");
+
+  // console.log({ resetToken }, this.passwordResetToken);
+
+  this.emailVerificationExpire = Date.now() + 1440 * 60 * 1000;
+
+  return verificationToken;
+};
 const User = mongoose.model("User", userSchema);
 
 module.exports = User;

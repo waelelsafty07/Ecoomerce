@@ -9,10 +9,76 @@ const sendEmail = require("../utils/email");
 const { sanitizeUser } = require("../utils/sentinizeData");
 const generateToken = require("../utils/generateToken");
 
+const verify = async (user, req, res, next) => {
+  // 2) Generate the random reset token
+  const resetToken = user.createVerificationToken();
+  await user.save({ validateBeforeSave: false });
+
+  // 3) Send it to user's email
+  try {
+    const resetURL = `<a  href="${req.protocol}://${req.get(
+      "host"
+    )}/api/v1/auth/confirm/activateAccount/${resetToken}"> Click Here </a>`;
+
+    await sendEmail({
+      email: user.email,
+      subject: "Your Should Activate your account 24h",
+      message: resetURL,
+    });
+
+    res.status(200).json({
+      status: "success",
+      message: "Verification confirm sent to email!",
+    });
+  } catch (err) {
+    user.emailVerificationToken = undefined;
+    user.emailVerificationExpire = undefined;
+    await user.save({ validateBeforeSave: false });
+
+    return next(
+      new ApiError("There was an error sending the email. Try again later!"),
+      500
+    );
+  }
+};
 /*  @desc   Sign Up User Account With Email
     @route  Post /api/v1/auth/signup
     @access Public  
 */
+
+exports.VerificationConfirm = asyncHandler(async (req, res, next) => {
+  // 1) Get user based on the token
+  const hashedToken = crypto
+    .createHash("sha256")
+    .update(req.params.token)
+    .digest("hex");
+
+  const user = await User.findOne({
+    emailVerificationToken: hashedToken,
+    emailVerificationExpire: { $gt: Date.now() },
+  });
+
+  // 2) If token has not expired, and there is user, set the new password
+  if (!user) {
+    return next(new ApiError("Token is invalid or has expired", 400));
+  }
+  user.emailVerificationToken = undefined;
+  user.emailVerificationExpire = undefined;
+  await user.save();
+
+  // 3) Generate Token
+  // 4) Log the user in, send JWT
+  const token = generateToken(user._id, process.env.JWT_EXPIRE_TIME);
+
+  // console.log(user);
+  res
+    .status(201)
+    .json({
+      verification: "Email Verified Verify",
+      data: sanitizeUser(user),
+      token,
+    });
+});
 exports.signup = asyncHandler(async (req, res, next) => {
   // Create User
   const user = await User.create({
@@ -20,10 +86,8 @@ exports.signup = asyncHandler(async (req, res, next) => {
     email: req.body.email,
     password: req.body.password,
   });
-  // Create Token
-  const token = generateToken(user._id, process.env.JWT_EXPIRE_TIME);
-  // genrate Token
-  res.status(201).json({ data: sanitizeUser(user), token });
+  verify(user, req, res, next);
+  // 3) Send it to user's email
 });
 
 /*  @desc   Login User Account With Email
@@ -39,7 +103,7 @@ exports.login = asyncHandler(async (req, res, next) => {
   if (!user || !(await bcrypt.compare(req.body.password, user.password))) {
     return next(new ApiError("Incorrect email or password", 404));
   }
-  if (!user.active) {
+  if (!user.emailVerificationVerified) {
     return next(new ApiError("Account not active", 401));
   }
   // generate token

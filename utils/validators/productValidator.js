@@ -50,7 +50,11 @@ exports.createProductValidator = [
   check("colors")
     .optional()
     .isArray()
-    .withMessage("availableColors should be array of string"),
+    .withMessage("available Colors should be array of string"),
+  check("sizes")
+    .optional()
+    .isArray()
+    .withMessage("available sizes should be array of string"),
   check("imageCover").notEmpty().withMessage("Product imageCover is required"),
   check("images")
     .optional()

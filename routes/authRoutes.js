@@ -6,6 +6,7 @@ const {
   forgotPassword,
   verifyPassResetCode,
   resetPassword,
+  VerificationConfirm,
   protect,
 } = require("../controller/authController");
 const {
@@ -23,4 +24,5 @@ router.post("/forgotPassword", forgotPasswordValidator, forgotPassword);
 router.post("/verifyResetCode", verifyResetCodeValidator, verifyPassResetCode);
 router.put("/resetPassword", protect, resetPasswordValidator, resetPassword);
 
+router.get("/confirm/activateAccount/:token", VerificationConfirm);
 module.exports = router;
