@@ -62,6 +62,7 @@ exports.VerificationConfirm = asyncHandler(async (req, res, next) => {
   if (!user) {
     return next(new ApiError("Token is invalid or has expired", 400));
   }
+  user.emailVerificationVerified = true;
   user.emailVerificationToken = undefined;
   user.emailVerificationExpire = undefined;
   await user.save();
