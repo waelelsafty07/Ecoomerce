@@ -44,7 +44,7 @@ app.post(
 // Middlewares
 app.use(
   express.json({
-    limit: "20kb",
+    limit: "1000kb",
   })
 );
 
