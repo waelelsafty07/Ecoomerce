@@ -72,13 +72,11 @@ exports.VerificationConfirm = asyncHandler(async (req, res, next) => {
   const token = generateToken(user._id, process.env.JWT_EXPIRE_TIME);
 
   // console.log(user);
-  res
-    .status(201)
-    .json({
-      verification: "Email Verified Verify",
-      data: sanitizeUser(user),
-      token,
-    });
+  res.status(201).json({
+    verification: "Email Verified Verify",
+    data: sanitizeUser(user),
+    token,
+  });
 });
 exports.signup = asyncHandler(async (req, res, next) => {
   // Create User
@@ -142,7 +140,7 @@ exports.protect = asyncHandler(async (req, res, next) => {
     );
   }
   // 4) check if user is active or not active
-  if (!currentUser.active) {
+  if (!currentUser.emailVerificationVerified) {
     return next(new ApiError("The user not active ", 401));
   }
   // 5) check if user change password after token created

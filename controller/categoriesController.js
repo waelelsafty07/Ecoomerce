@@ -14,12 +14,15 @@ exports.uploadCategoryImage = uploadSingleImage("image");
 
 exports.resizeCategoryImage = asyncHandler(async (req, res, next) => {
   const filename = `category-${uuidv4()}-${Date.now()}.webp`;
-  await sharp(req.file.buffer)
-    .resize(600, 600)
-    .toFormat("webp")
-    .webp({ quality: 85 })
-    .toFile(`uploads/categories/${filename}`);
-  req.body.image = filename;
+  if (req.file) {
+    await sharp(req.file.buffer)
+      .resize(600, 600)
+      .toFormat("webp")
+      .webp({ quality: 85 })
+      .toFile(`uploads/categories/${filename}`);
+    req.body.image = filename;
+  }
+
   next();
 });
 /*  @desc   Get list of categories
