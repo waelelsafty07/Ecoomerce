@@ -13,7 +13,7 @@ const categorySchema = new mongoose.Schema(
       type: String,
       lowercase: true,
     },
-    priority: Number,
+    priority: String,
     image: String,
   },
   {
