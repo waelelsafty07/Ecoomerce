@@ -1,17 +1,18 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const orderSchema = new mongoose.Schema(
   {
     user: {
       type: mongoose.Schema.ObjectId,
-      ref: 'User',
-      required: [true, 'Order must be belong to user'],
+      ref: "User",
+      required: [true, "Order must be belong to user"],
     },
+    order_id: String,
     cartItems: [
       {
         product: {
           type: mongoose.Schema.ObjectId,
-          ref: 'Product',
+          ref: "Product",
         },
         quantity: Number,
         color: String,
@@ -28,7 +29,10 @@ const orderSchema = new mongoose.Schema(
       phone: String,
       city: String,
       postalCode: String,
+      country: String,
+      state: String,
     },
+    pickup_location: String,
     shippingPrice: {
       type: Number,
       default: 0,
@@ -38,8 +42,8 @@ const orderSchema = new mongoose.Schema(
     },
     paymentMethodType: {
       type: String,
-      enum: ['card', 'cash'],
-      default: 'cash',
+      enum: ["card", "cash"],
+      default: "cash",
     },
     isPaid: {
       type: Boolean,
@@ -57,14 +61,14 @@ const orderSchema = new mongoose.Schema(
 
 orderSchema.pre(/^find/, function (next) {
   this.populate({
-    path: 'user',
-    select: 'name profileImg email phone',
+    path: "user",
+    select: "name profileImg email phone",
   }).populate({
-    path: 'cartItems.product',
-    select: 'title imageCover ',
+    path: "cartItems.product",
+    select: "title imageCover ",
   });
 
   next();
 });
 
-module.exports = mongoose.model('Order', orderSchema);
+module.exports = mongoose.model("Order", orderSchema);

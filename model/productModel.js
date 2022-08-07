@@ -9,6 +9,15 @@ const productSchema = new mongoose.Schema(
       minlength: [3, "Too short product title"],
       maxlength: [100, "Too long product title"],
     },
+    tags: String,
+    COD: { type: Boolean, default: false },
+    multiple_tax: String,
+    variation: String,
+    personalized: { type: Boolean, default: false },
+    refundable: {
+      type: Boolean,
+      default: false,
+    },
     slug: {
       type: String,
       required: true,
@@ -68,6 +77,7 @@ const productSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    weight: String,
   },
   { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );

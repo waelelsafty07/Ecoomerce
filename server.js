@@ -1,5 +1,6 @@
 const path = require("path");
 
+const cron = require("node-cron");
 const express = require("express");
 const cookieParser = require("cookie-parser");
 
@@ -8,8 +9,22 @@ const morgan = require("morgan");
 const rateLimit = require("express-rate-limit");
 
 const csrf = require("csurf");
-
 const dbConnection = require("./config/database");
+
+const ShipRocket = require("./utils/shiprocket");
+const Redis = require("./utils/redis");
+
+cron.schedule("* * * 10 * *", async () => {
+  try {
+    const { status, data, message } = await new ShipRocket(null).login();
+
+    // eslint-disable-next-line no-throw-literal
+    if (!status) throw { message };
+    await new Redis().set("token", data.token);
+  } catch (e) {
+    console.log(e.message);
+  }
+});
 
 const ApiError = require("./utils/apiErorr");
 const globalError = require("./middlewares/errorMiddelware");
@@ -23,6 +38,7 @@ dotenv.config();
 dbConnection();
 
 const app = express();
+
 // All app secuirty  function
 appSecuirty(app);
 

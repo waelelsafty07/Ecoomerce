@@ -6,6 +6,7 @@ const stripe = require("stripe")(process.env.STRIPE_SECRET);
 const asyncHandler = require("express-async-handler");
 const factory = require("./handlerFactory");
 const ApiError = require("../utils/apiErorr");
+const ShipRocket = require("../utils/shiprocket");
 
 const User = require("../model/userModel");
 const Product = require("../model/productModel");
@@ -44,6 +45,7 @@ exports.createCashOrder = asyncHandler(async (req, res, next) => {
     ? cart.totalPriceAfterDiscount
     : cart.totalCartPrice;
   const totalOrderPrice = cartPrice + taxPrice + shippingPrice;
+
   // create Order with Cash
   const order = await Order.create({
     user: req.user._id,
@@ -51,8 +53,71 @@ exports.createCashOrder = asyncHandler(async (req, res, next) => {
     shippingAddress: req.body.shippingAddress,
     totalOrderPrice,
   });
+  // create Order in shiprocket
+  /*
+  shippingAddress: {
+      details: String,
+      phone: String,
+      city: String,
+      postalCode: String,
+    } 
+  */
+  const today = new Date().toISOString().slice(0, 10);
+  console.log(req.user);
+  const data = {
+    order_id: order.id,
+    order_date: today,
+    pickup_location: "TSF",
+    channel_id: "",
+    comment: "Reseller: ",
+    billing_customer_name: req.user.name,
+    billing_last_name: "",
+    billing_address: req.user.addresses[0].details,
+    billing_address_2: "Near Hokage House",
+    billing_city: req.user.addresses[0].city,
+    billing_pincode: req.user.addresses[0].postalCode,
+    billing_state: req.user.addresses[0].state,
+    billing_country: req.user.addresses[0].country,
+    billing_email: req.user.email,
+    billing_phone: req.user.addresses[0].phone,
+    shipping_is_billing: true,
+    shipping_customer_name: "",
+    shipping_last_name: "",
+    shipping_address: "",
+    shipping_address_2: "",
+    shipping_city: "",
+    shipping_pincode: "",
+    shipping_country: "",
+    shipping_state: "",
+    shipping_email: "",
+    shipping_phone: "",
+    order_items: [
+      {
+        name: "Kunai",
+        sku: "chakra123",
+        units: 10,
+        selling_price: "900",
+        discount: "",
+        tax: order.taxPrice,
+      },
+    ],
+    payment_method: "COD",
+    shipping_charges: 0,
+    giftwrap_charges: 0,
+    transaction_charges: 0,
+    total_discount: totalOrderPrice - cart.totalPriceAfterDiscount,
+    sub_total: totalOrderPrice,
+    length: 10,
+    breadth: 15,
+    height: 20,
+    weight: 2.5,
+  };
+
+  const shipRocket = new ShipRocket(req.shipRocket);
+  const shipRocketRes = await shipRocket.requestCreateOrder(data);
   // inc sold and decrease quantity
-  afterCreateOrder(order, cart, req.params.cartId);
+  console.log(shipRocketRes);
+  // afterCreateOrder(order, cart, req.params.cartId);
 
   res.status(201).json({ status: "success", data: order });
 });

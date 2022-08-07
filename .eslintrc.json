@@ -13,6 +13,7 @@
     "no-return-await": "off",
     "no-underscore-dangle": "off",
     "class-methods-use-this": "off",
+    "camelcase": "off",
     "no-undef": "error",
     "node/no-unsupported-features/es-syntax": "off",
     "prefer-destructuring": ["off", { "object": true, "array": false }],
