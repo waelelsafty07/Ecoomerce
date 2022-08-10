@@ -14,12 +14,14 @@ exports.uploadSubCatImage = uploadSingleImage("image");
 
 exports.resizeSubCatImage = asyncHandler(async (req, res, next) => {
   const filename = `subcategory-${uuidv4()}-${Date.now()}.webp`;
+  if (req.file) {
   await sharp(req.file.buffer)
     .resize(600, 600)
     .toFormat("webp")
     .webp({ quality: 85 })
     .toFile(`uploads/subcategories/${filename}`);
   req.body.image = filename;
+  }
   next();
 });
 // Nested Routes 
