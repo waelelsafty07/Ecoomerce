@@ -22,22 +22,21 @@ exports.addProductToCart = asyncHandler(async (req, res, next) => {
   const { productId, color, size } = req.body;
   const product = await Product.findById(productId);
   const brandName = product.brand ? product.brand.name : null;
+  const categoryName = product.category ? product.category.name : null;
   // 1) Get Cart for logged user
   let cart = await Cart.findOne({ user: req.user._id });
   if (!cart) {
     // create cart fot logged user with product
+    const today = new Date();
     cart = await Cart.create({
       user: req.user._id,
       orderItems: [
         {
           name: product.title,
-          sku: product.title,
+          sku: "today",
           selling_price: product.price,
           discount: "",
           tax: "",
-          brand: brandName,
-          color: color,
-          size: size,
         },
       ],
       cartItems: [
@@ -81,9 +80,6 @@ exports.addProductToCart = asyncHandler(async (req, res, next) => {
         selling_price: product.price,
         discount: "",
         tax: "",
-        brand: brandName,
-        color: color,
-        size: size,
       });
     }
   }

@@ -13,9 +13,6 @@ const cartSchema = new mongoose.Schema(
         selling_price: Number,
         discount: Number,
         tax: Number,
-        color: String,
-        size: String,
-        brand: String,
       },
     ],
 
