@@ -19,32 +19,76 @@ const calculateTotalPrice = (cart) => {
 // @access  Private/User
 
 exports.addProductToCart = asyncHandler(async (req, res, next) => {
-  const { productId, color } = req.body;
+  const { productId, color, size } = req.body;
   const product = await Product.findById(productId);
-
+  const brandName = product.brand ? product.brand.name : null;
   // 1) Get Cart for logged user
   let cart = await Cart.findOne({ user: req.user._id });
   if (!cart) {
     // create cart fot logged user with product
     cart = await Cart.create({
       user: req.user._id,
-      cartItems: [{ product: productId, color, price: product.price }],
+      orderItems: [
+        {
+          name: product.title,
+          sku: product.title,
+          selling_price: product.price,
+          discount: "",
+          tax: "",
+          brand: brandName,
+          color: color,
+          size: size,
+        },
+      ],
+      cartItems: [
+        {
+          product: productId,
+          color,
+          size,
+          brand: brandName,
+          price: product.price,
+        },
+      ],
     });
   } else {
     const productIndex = cart.cartItems.findIndex(
-      (item) => item.product.toString() === productId && item.color === color
+      (item) =>
+        item.product.toString() === productId &&
+        item.color === color &&
+        item.size === size &&
+        item.brand === brandName
     );
 
     if (productIndex > -1) {
       const cartItem = cart.cartItems[productIndex];
       cartItem.quantity += 1;
+      const orderItem = cart.orderItems[productIndex];
+      orderItem.units = cartItem.quantity;
+      cart.orderItems[productIndex] = orderItem;
       cart.cartItems[productIndex] = cartItem;
     } else {
       // product not exist in cart,  push product to cartItems array
-      cart.cartItems.push({ product: productId, color, price: product.price });
+      cart.cartItems.push({
+        product: productId,
+        brand: brandName,
+        color,
+        size,
+        price: product.price,
+      });
+      cart.orderItems.push({
+        name: product.title,
+        sku: product.title,
+        selling_price: product.price,
+        discount: "",
+        tax: "",
+        brand: brandName,
+        color: color,
+        size: size,
+      });
     }
   }
   // calculate total price
+
   calculateTotalPrice(cart);
   await cart.save();
 
@@ -61,10 +105,14 @@ exports.addProductToCart = asyncHandler(async (req, res, next) => {
 // @access  Private/User
 
 exports.getLoggedUserCart = asyncHandler(async (req, res, next) => {
-  const cart = await Cart.findOne(req.user._id);
+  const cart = await Cart.findOne({ user: req.user._id });
+
   if (!cart) {
-    return next(new ApiError("No cart founded", 404));
+    return next(
+      new ApiError(`There is no cart for this user id : ${req.user._id}`, 404)
+    );
   }
+
   res.status(200).json({
     status: "success",
     numOfCartItems: cart.cartItems.length,

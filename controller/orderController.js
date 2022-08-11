@@ -63,7 +63,7 @@ exports.createCashOrder = asyncHandler(async (req, res, next) => {
     } 
   */
   const today = new Date().toISOString().slice(0, 10);
-  console.log(req.user);
+  console.log(req.body.shippingAddress.details);
   const data = {
     order_id: order.id,
     order_date: today,
@@ -72,35 +72,26 @@ exports.createCashOrder = asyncHandler(async (req, res, next) => {
     comment: "Reseller: ",
     billing_customer_name: req.user.name,
     billing_last_name: "",
-    billing_address: req.user.addresses[0].details,
+    billing_address: req.body.billingAddress.details,
     billing_address_2: "Near Hokage House",
-    billing_city: req.user.addresses[0].city,
-    billing_pincode: req.user.addresses[0].postalCode,
-    billing_state: req.user.addresses[0].state,
-    billing_country: req.user.addresses[0].country,
+    billing_city: req.body.billingAddress.city,
+    billing_pincode: req.body.billingAddress.postalCode,
+    billing_state: req.body.billingAddress.state,
+    billing_country: req.body.billingAddress.country,
     billing_email: req.user.email,
-    billing_phone: req.user.addresses[0].phone,
-    shipping_is_billing: true,
-    shipping_customer_name: "",
+    billing_phone: req.body.billingAddress.phone,
+    shipping_is_billing: req.body.shipping_is_billing,
+    shipping_customer_name: req.body.shipping_customer_name,
     shipping_last_name: "",
-    shipping_address: "",
+    shipping_address: req.body.shippingAddress.details,
     shipping_address_2: "",
-    shipping_city: "",
-    shipping_pincode: "",
-    shipping_country: "",
-    shipping_state: "",
-    shipping_email: "",
-    shipping_phone: "",
-    order_items: [
-      {
-        name: "Kunai",
-        sku: "chakra123",
-        units: 10,
-        selling_price: "900",
-        discount: "",
-        tax: order.taxPrice,
-      },
-    ],
+    shipping_city: req.body.shippingAddress.city,
+    shipping_pincode: req.body.shippingAddress.postalCode,
+    shipping_country: req.body.shippingAddress.country,
+    shipping_state: req.body.shippingAddress.state,
+    shipping_email: req.body.shipping_email,
+    shipping_phone: req.body.shippingAddress.phone,
+    order_items: cart.orderItems,
     payment_method: "COD",
     shipping_charges: 0,
     giftwrap_charges: 0,
@@ -117,6 +108,8 @@ exports.createCashOrder = asyncHandler(async (req, res, next) => {
   const shipRocketRes = await shipRocket.requestCreateOrder(data);
   // inc sold and decrease quantity
   console.log(shipRocketRes);
+  order.order_id = shipRocketRes.data.order_id;
+  order.save();
   // afterCreateOrder(order, cart, req.params.cartId);
 
   res.status(201).json({ status: "success", data: order });
@@ -124,6 +117,7 @@ exports.createCashOrder = asyncHandler(async (req, res, next) => {
 
 exports.filterOrderForLoggedUser = asyncHandler(async (req, res, next) => {
   if (req.user.role === "user") req.filterObj = { user: req.user._id };
+  console.log(req.user._id);
   next();
 });
 // @desc    Get all orders

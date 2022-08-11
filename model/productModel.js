@@ -94,7 +94,7 @@ productSchema.pre(/^find/, function (next) {
 // Mongoose query middleware
 productSchema.pre(/^find/, function (next) {
   this.populate({
-    path: "category",
+    path: "brand",
     select: "name -_id",
   });
   next();

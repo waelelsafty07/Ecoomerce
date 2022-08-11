@@ -2,6 +2,23 @@ const mongoose = require("mongoose");
 
 const cartSchema = new mongoose.Schema(
   {
+    orderItems: [
+      {
+        name: String,
+        sku: String,
+        units: {
+          type: Number,
+          default: 1,
+        },
+        selling_price: Number,
+        discount: Number,
+        tax: Number,
+        color: String,
+        size: String,
+        brand: String,
+      },
+    ],
+
     cartItems: [
       {
         product: {
@@ -14,7 +31,9 @@ const cartSchema = new mongoose.Schema(
           default: 1,
         },
         color: String,
+        size: String,
         price: Number,
+        brand: String,
       },
     ],
     totalCartPrice: Number,
