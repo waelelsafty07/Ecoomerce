@@ -46,6 +46,13 @@ exports.resizeProductImages = asyncHandler(async (req, res, next) => {
   }
   // next();
 });
+
+exports.filterobj = (req, res, next) => {
+  let filterObject = {};
+  if (req.params.categoryId) filterObject = { category: req.params.categoryId };
+  req.filterObj = filterObject;
+  next();
+};
 /*  @desc   Get list of products
     @route  GET /api/v1/products
     @access Public  

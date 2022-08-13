@@ -8,6 +8,7 @@ const {
   deleteProduct,
   uploadProductImages,
   resizeProductImages,
+  filterobj,
 } = require("../controller/productsController");
 const {
   getProductValidator,
@@ -18,11 +19,11 @@ const {
 const { protect, restrictTo } = require("../controller/authController");
 const reviewRoutes = require("./reviewRoutes");
 
-const router = express.Router();
+const router = express.Router({ mergeParams: true });
 router.use("/:productId/reviews", reviewRoutes);
 router
   .route("/")
-  .get(getProducts)
+  .get(filterobj, getProducts)
   .post(
     protect,
     restrictTo("admin", "manager"),

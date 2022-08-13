@@ -18,10 +18,12 @@ const {
   deleteCategoryValidator,
 } = require("../utils/validators/categoryValidator");
 const subCategoryRoutes = require("./subCategoryRoutes");
+const productsRoutes = require("./productRoutes");
 
 const router = express.Router();
 router.route("/exportData").get(exportData);
 router.use("/:categoryId/subcategories", subCategoryRoutes);
+router.use("/:categoryId/products", productsRoutes);
 router
   .route("/")
   .get(getCategories)

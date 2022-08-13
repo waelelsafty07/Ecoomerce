@@ -6,7 +6,7 @@ const Factory = require("./handlerFactory");
 // @desc       products/productId/reviews
 // @route  GET products/productId/reviews
 
-exports.filterobj = (req, res, next) => {
+exports.  filterobj = (req, res, next) => {
   let filterObject = {};
   if (req.params.productId) filterObject = { product: req.params.productId };
   req.filterObj = filterObject;
