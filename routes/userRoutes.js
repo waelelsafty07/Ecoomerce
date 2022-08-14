@@ -44,7 +44,7 @@ router.delete("/deleteMe", deleteLoggedUserData);
 
 // @desc middleware for resources restrictTo
 
-router.use(restrictTo("admin"));
+router.use(restrictTo("admin" ,"manager"));
 
 // @desc Routes can admin allowed to use this
 
