@@ -54,8 +54,7 @@ exports.addProductToCart = asyncHandler(async (req, res, next) => {
       (item) =>
         item.product.toString() === productId &&
         item.color === color &&
-        item.size === size &&
-        item.brand === brandName
+        item.size === size
     );
 
     if (productIndex > -1) {
