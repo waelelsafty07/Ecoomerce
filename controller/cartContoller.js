@@ -19,10 +19,12 @@ const calculateTotalPrice = (cart) => {
 // @access  Private/User
 
 exports.addProductToCart = asyncHandler(async (req, res, next) => {
-  const { productId, color, size } = req.body;
+  const { productId, color, size, quantity } = req.body;
   const product = await Product.findById(productId);
   const brandName = product.brand ? product.brand.name : null;
   const categoryName = product.category ? product.category.name : null;
+  console.log(quantity);
+
   // 1) Get Cart for logged user
   let cart = await Cart.findOne({ user: req.user._id });
   if (!cart) {
@@ -34,6 +36,7 @@ exports.addProductToCart = asyncHandler(async (req, res, next) => {
         {
           name: product.title,
           sku: "today",
+          units: quantity,
           selling_price: product.price,
           discount: "",
           tax: "",
@@ -44,6 +47,7 @@ exports.addProductToCart = asyncHandler(async (req, res, next) => {
           product: productId,
           color,
           size,
+          quantity,
           brand: brandName,
           price: product.price,
         },
@@ -52,14 +56,15 @@ exports.addProductToCart = asyncHandler(async (req, res, next) => {
   } else {
     const productIndex = cart.cartItems.findIndex(
       (item) =>
-        item.product.toString() === productId &&
+        item.product.id.toString() === productId &&
         item.color === color &&
         item.size === size
     );
 
     if (productIndex > -1) {
       const cartItem = cart.cartItems[productIndex];
-      cartItem.quantity += 1;
+      if (quantity > 1) cartItem.quantity += quantity;
+      else cartItem.quantity += 1;
       const orderItem = cart.orderItems[productIndex];
       orderItem.units = cartItem.quantity;
       cart.orderItems[productIndex] = orderItem;
@@ -68,14 +73,15 @@ exports.addProductToCart = asyncHandler(async (req, res, next) => {
       // product not exist in cart,  push product to cartItems array
       cart.cartItems.push({
         product: productId,
-        brand: brandName,
         color,
         size,
+        quantity: quantity,
         price: product.price,
       });
       cart.orderItems.push({
         name: product.title,
         sku: product.title,
+        units: quantity,
         selling_price: product.price,
         discount: "",
         tax: "",
