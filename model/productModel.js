@@ -11,6 +11,7 @@ const productSchema = new mongoose.Schema(
     },
     tags: String,
     COD: { type: Boolean, default: false },
+    isFav: { type: Boolean, default: false },
     multiple_tax: String,
     variation: String,
     personalized: { type: Boolean, default: false },
