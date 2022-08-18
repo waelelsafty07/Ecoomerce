@@ -8,6 +8,7 @@ const User = require("../model/userModel");
 const sendEmail = require("../utils/email");
 const { sanitizeUser } = require("../utils/sanitizeData");
 const generateToken = require("../utils/generateToken");
+const { sendSuccess } = require("../utils/sendResponse");
 
 const verify = async (user, req, res, next) => {
   // 2) Generate the random reset token
@@ -26,8 +27,7 @@ const verify = async (user, req, res, next) => {
       message: resetURL,
     });
 
-    res.status(200).json({
-      status: "success",
+    sendSuccess(null, 200, res, {
       message: "Verification confirm sent to email!",
     });
   } catch (err) {
@@ -65,22 +65,17 @@ exports.VerificationConfirm = asyncHandler(async (req, res, next) => {
     console.log("user not found");
     return next(new APIError("Token is invalid or has expired", 400));
   }
-  console.log(1);
   user.emailVerificationVerified = true;
   user.emailVerificationToken = undefined;
   user.emailVerificationExpire = undefined;
   await user.save();
 
-  console.log(2);
   // 3) Generate Token
   // 4) Log the user in, send JWT
   const token = generateToken(user._id, process.env.JWT_EXPIRE_TIME, res);
 
-  console.log(3);
-  // console.log(user);
-  res.status(201).json({
-    verification: "Email Verified Verify",
-    data: sanitizeUser(user),
+  sendSuccess(sanitizeUser(user), 201, res, {
+    message: "Email Verified Verify",
     token,
   });
 });
@@ -92,7 +87,6 @@ exports.signup = asyncHandler(async (req, res, next) => {
     password: req.body.password,
   });
   verify(user, req, res, next);
-  // 3) Send it to user's email
 });
 
 /*  @desc   Login User Account With Email
@@ -115,7 +109,10 @@ exports.login = asyncHandler(async (req, res, next) => {
   const token = generateToken(user._id, process.env.JWT_EXPIRE_TIME, res);
 
   // console.log(user);
-  res.status(201).json({ data: sanitizeUser(user), token });
+
+  sendSuccess(sanitizeUser(user), 200, res, {
+    token,
+  });
 });
 
 // @desc make sure user is authenticated
@@ -259,9 +256,9 @@ exports.forgotPassword = asyncHandler(async (req, res, next) => {
     return next(new APIError(`there is an error in sending email`, 500));
   }
 
-  res
-    .status(200)
-    .json({ status: "Success", message: "Reset code sent to email" });
+  sendSuccess(null, 200, res, {
+    message: "Reset code sent to email",
+  });
 });
 
 // @desc    Verify password reset code
@@ -290,10 +287,8 @@ exports.verifyPassResetCode = asyncHandler(async (req, res, next) => {
     process.env.JWT_EXPIRE_TIME_RESET_CODE,
     res
   );
-  res.status(200).json({
-    status: "Success",
-    token,
-  });
+
+  sendSuccess(null, 200, res, { token });
 });
 
 // @desc    Reset password
@@ -321,5 +316,5 @@ exports.resetPassword = asyncHandler(async (req, res, next) => {
 
   // 3) if everything is ok, generate token
   const token = generateToken(user._id, process.env.JWT_EXPIRE_TIME, res);
-  res.status(200).json({ token });
+  sendSuccess(null, 200, res, { token });
 });

@@ -8,6 +8,7 @@ const User = require("../model/userModel");
 const Factory = require("./handlerFactory");
 const { uploadSingleImage } = require("../middlewares/uploadImageMiddleware");
 const generateToken = require("../utils/generateToken");
+const { sendSuccess } = require("../utils/sendResponse");
 
 // filter requests body
 const filterObj = (obj, ...allowedFields) => {
@@ -68,7 +69,7 @@ exports.updateUser = asyncHandler(async (req, res, next) => {
   if (!user) {
     return next(new APIError(`No User for this id: ${req.params.id}`, 400));
   }
-  res.status(200).json({ data: user });
+  sendSuccess(user, 200, res);
 });
 
 /*  @desc   Update Password user by id
@@ -91,7 +92,7 @@ exports.changeUserPassword = asyncHandler(async (req, res, next) => {
   if (!user) {
     return next(new APIError(`No User for this id${req.params.id}`, 400));
   }
-  res.status(200).json({ data: user });
+  sendSuccess(user, 200, res);
 });
 /*  @desc   Update specific user by id
     @route  Delete /api/v1/users/:id
@@ -131,7 +132,7 @@ exports.updateLoggedUserPassword = asyncHandler(async (req, res, next) => {
   );
 
   const token = generateToken(user._id, process.env.JWT_EXPIRE_TIME, res);
-  res.status(200).json({ data: user, token });
+  sendSuccess(user, 200, res, { token });
 });
 
 /*  @desc   Update Logged user data
@@ -150,7 +151,7 @@ exports.updateLoggedUserData = asyncHandler(async (req, res, next) => {
   const user = await User.findByIdAndUpdate(req.user._id, filterBody, {
     new: true,
   });
-  res.status(200).json({ data: user });
+  sendSuccess(user, 200, res);
 });
 
 // @desc    Deactivate logged user
@@ -159,5 +160,5 @@ exports.updateLoggedUserData = asyncHandler(async (req, res, next) => {
 exports.deleteLoggedUserData = asyncHandler(async (req, res, next) => {
   await User.findByIdAndUpdate(req.user._id, { active: false });
 
-  res.status(204).json({ status: "Success" });
+  sendSuccess(null, 204, res);
 });

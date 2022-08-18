@@ -2,6 +2,8 @@ const asyncHandler = require("express-async-handler");
 
 const User = require("../model/userModel");
 
+const { sendSuccess } = require("../utils/sendResponse");
+
 // @desc    Add product to wishlist
 // @route   POST /api/v1/wishlists
 // @access  Protect / user
@@ -14,10 +16,8 @@ exports.addProductToWishlist = asyncHandler(async (req, res, next) => {
     { new: true }
   );
 
-  res.status(200).json({
-    status: "success",
+  sendSuccess(user.wishlist, 200, res, {
     message: "Product added successfully to your wishlist.",
-    data: user.wishlist,
   });
 });
 // @desc    Remove product to wishlist
@@ -32,9 +32,8 @@ exports.removeProductToWishlist = asyncHandler(async (req, res, next) => {
     { new: true }
   );
 
-  res.status(200).json({
-    status: "success",
-    message: "Product removed successfully to your wishlist.",
+  sendSuccess(null, 200, res, {
+    message: "Product removed successfully from your wishlist.",
   });
 });
 
@@ -44,9 +43,5 @@ exports.removeProductToWishlist = asyncHandler(async (req, res, next) => {
 exports.getLoggedUserWishlist = asyncHandler(async (req, res, next) => {
   const user = await User.findById(req.user._id).populate("wishlist");
 
-  res.status(200).json({
-    status: "success",
-    results: user.wishlist.length,
-    data: user.wishlist,
-  });
+  sendSuccess(user.wishlist, 200, res, { results: user.wishlist.length });
 });

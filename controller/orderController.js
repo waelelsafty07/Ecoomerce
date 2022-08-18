@@ -7,6 +7,7 @@ const asyncHandler = require("express-async-handler");
 const factory = require("./handlerFactory");
 const APIError = require("../utils/APIError");
 const ShipRocket = require("../utils/shiprocket");
+const { sendSuccess } = require("../utils/sendResponse");
 
 const User = require("../model/userModel");
 const Product = require("../model/productModel");
@@ -112,12 +113,11 @@ exports.createCashOrder = asyncHandler(async (req, res, next) => {
   order.save();
   // afterCreateOrder(order, cart, req.params.cartId);
 
-  res.status(201).json({ status: "success", data: order });
+  sendSuccess(order, 201, res);
 });
 
 exports.filterOrderForLoggedUser = asyncHandler(async (req, res, next) => {
   if (req.user.role === "user") req.filterObj = { user: req.user._id };
-  console.log(req.user._id);
   next();
 });
 // @desc    Get all orders
@@ -150,7 +150,7 @@ exports.updateOrderToPaid = asyncHandler(async (req, res, next) => {
 
   const updatedOrder = await order.save();
 
-  res.status(200).json({ status: "success", data: updatedOrder });
+  sendSuccess(updatedOrder, 200, res);
 });
 
 // @desc    Update order delivered status
@@ -174,7 +174,7 @@ exports.updateOrderToDelivered = asyncHandler(async (req, res, next) => {
 
   const updatedOrder = await order.save();
 
-  res.status(200).json({ status: "success", data: updatedOrder });
+  sendSuccess(updatedOrder, 200, res);
 });
 
 // @desc    Get  checkout session from stripe and send
@@ -221,7 +221,7 @@ exports.checkoutSession = asyncHandler(async (req, res, next) => {
   });
 
   // 4) send session to response
-  res.status(200).json({ status: "success", session });
+  sendSuccess(null, 200, res, { session });
 });
 
 // Create Card Order function
@@ -267,5 +267,5 @@ exports.webhookCheckout = asyncHandler(async (req, res, next) => {
     console.log("hi");
     createCardOrder(event.data.object);
   }
-  res.status(200).json({ received: true });
+  sendSuccess(null, 200, res, { received: true });
 });
