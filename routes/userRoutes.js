@@ -10,7 +10,7 @@ const {
   resizeUserImage,
   changeUserPassword,
   getLoggedUserData,
-  updateLoggedUserPassowrd,
+  updateLoggedUserPassword,
   updateLoggedUserData,
   deleteLoggedUserData,
 } = require("../controller/userController");
@@ -37,14 +37,14 @@ router.get("/getMe", getLoggedUserData, getUser);
 router.put(
   "/updateMyPassword",
   changeLoggedPasswordValidator,
-  updateLoggedUserPassowrd
+  updateLoggedUserPassword
 );
 router.put("/updateMyData", updateLoggedUserValidator, updateLoggedUserData);
 router.delete("/deleteMe", deleteLoggedUserData);
 
 // @desc middleware for resources restrictTo
 
-router.use(restrictTo("admin" ,"manager"));
+router.use(restrictTo("admin", "manager"));
 
 // @desc Routes can admin allowed to use this
 

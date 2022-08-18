@@ -1,6 +1,6 @@
 const slugify = require("slugify");
 const { check } = require("express-validator");
-const validatorMiddleware = require("../../middlewares/validatorMiddelware");
+const validatorMiddleware = require("../../middlewares/validatorMiddleware");
 const User = require("../../model/userModel");
 
 // @desc SignUp Validator
@@ -48,6 +48,7 @@ exports.signUpValidator = [
 ];
 // @desc Login Validator
 exports.loginValidator = [
+
   check("email")
     .notEmpty()
     .withMessage("Email required")

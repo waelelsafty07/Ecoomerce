@@ -1,4 +1,6 @@
-class ApiFeaturs {
+const APIError = require("./APIError");
+
+class APIFeatures {
   constructor(mongooseQuery, queryString) {
     this.mongooseQuery = mongooseQuery;
     this.queryString = queryString;
@@ -28,12 +30,18 @@ class ApiFeaturs {
   }
 
   limitFields() {
-    if (this.queryString.fields) {
-      const fields = this.queryString.fields.split(",").join(" ");
-      this.mongooseQuery = this.mongooseQuery.select(fields);
-    } else {
-      this.mongooseQuery = this.mongooseQuery.select("-__v");
+    let select = this.queryString.fields;
+    console.log(select);
+    if (!select || select.trim().length === 0) {
+      this.mongooseQuery = this.mongooseQuery.select("-password -__v");
+      return this;
     }
+
+    select = select.split(",").join(" ");
+    if (select.includes("password"))
+      throw new APIError("You can not select password field", 400);
+
+    this.mongooseQuery = this.mongooseQuery.select(select);
     return this;
   }
 
@@ -80,4 +88,4 @@ class ApiFeaturs {
   }
 }
 
-module.exports = ApiFeaturs;
+module.exports = APIFeatures;

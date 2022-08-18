@@ -1,6 +1,6 @@
 const { check } = require("express-validator");
 const slugify = require("slugify");
-const validatorMiddleware = require("../../middlewares/validatorMiddelware");
+const validatorMiddleware = require("../../middlewares/validatorMiddleware");
 
 exports.getBrandValidator = [
   check("id").isMongoId().withMessage("Invalid Brand ID Format"),

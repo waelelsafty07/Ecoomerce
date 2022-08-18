@@ -5,7 +5,7 @@ const { v4: uuidv4 } = require("uuid");
 const Category = require("../model/categoryModel");
 const Factory = require("./handlerFactory");
 
-const { uploadSingleImage } = require("../middlewares/uploadImageMiddelware");
+const { uploadSingleImage } = require("../middlewares/uploadImageMiddleware");
 
 // uploads a single image
 exports.uploadCategoryImage = uploadSingleImage("image");

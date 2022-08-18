@@ -1,20 +1,19 @@
+require("dotenv").config();
 const path = require("path");
 
 const cron = require("node-cron");
 const express = require("express");
 const cookieParser = require("cookie-parser");
-
-const dotenv = require("dotenv");
 const morgan = require("morgan");
 const rateLimit = require("express-rate-limit");
 
-const csrf = require("csurf");
+// const csrf = require("csurf");
 const dbConnection = require("./config/database");
 
 const ShipRocket = require("./utils/shiprocket");
 const Redis = require("./utils/redis");
 
-cron.schedule("* * * 10 * *", async () => {
+cron.schedule("* * 23 9 * *", async () => {
   try {
     const { status, data, message } = await new ShipRocket(null).login();
 
@@ -26,21 +25,20 @@ cron.schedule("* * * 10 * *", async () => {
   }
 });
 
-const ApiError = require("./utils/apiErorr");
-const globalError = require("./middlewares/errorMiddelware");
-const appSecuirty = require("./utils/appSecuirty");
+const APIError = require("./utils/APIError");
+const globalError = require("./middlewares/errorMiddleware");
+const appSecurity = require("./utils/appSecurity");
 const { webhookCheckout } = require("./controller/orderController");
 // Routes
 const mountRoutes = require("./routes");
 
-dotenv.config();
 // connect to mongoose database
 dbConnection();
 
 const app = express();
 
-// All app secuirty  function
-appSecuirty(app);
+// All app security  function
+appSecurity(app);
 
 // serve static files images in path /uploads
 
@@ -73,8 +71,8 @@ const limiter = rateLimit({
 app.use("/api", limiter);
 
 // const csrfProtection = csrf({ cookie: true });
+app.use(cookieParser());
 
-// app.use(cookieParser());
 // app.use("/api/v1/auth", csrfProtection);
 // app.get("/form", csrfProtection, (req, res) => {
 //   // pass the csrfToken to the view
@@ -86,7 +84,7 @@ mountRoutes(app, express);
 
 app.all("*", (req, res, next) => {
   // Create Error and send it to error handler
-  next(new ApiError(`Can't find this route ${req.originalUrl}`, 400));
+  next(new APIError(`Can't find this route ${req.originalUrl}`, 400));
 });
 // Global Errors handling middleware
 app.use(globalError);

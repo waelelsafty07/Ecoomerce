@@ -6,7 +6,7 @@ const { v4: uuidv4 } = require("uuid");
 const Product = require("../model/productModel");
 const Factory = require("./handlerFactory");
 
-const { uploadMixOfImages } = require("../middlewares/uploadImageMiddelware");
+const { uploadMixOfImages } = require("../middlewares/uploadImageMiddleware");
 
 exports.uploadProductImages = uploadMixOfImages([
   {

@@ -83,9 +83,8 @@ userSchema.methods.createVerificationToken = function () {
     .update(verificationToken)
     .digest("hex");
 
-  // console.log({ resetToken }, this.passwordResetToken);
-
-  this.emailVerificationExpire = Date.now() + 1440 * 60 * 1000;
+  this.emailVerificationExpire =
+    Date.now() + process.env.EXPIRE_TIME_RESET_CODE * 60 * 60 * 1000;
 
   return verificationToken;
 };

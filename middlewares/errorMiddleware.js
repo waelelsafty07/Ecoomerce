@@ -1,9 +1,9 @@
-const ApiError = require("../utils/apiErorr");
+const APIError = require("../utils/APIError");
 
 const handleJWTInvalidSignature = () =>
-  new ApiError("Inavlid Token, Please login again.", 401);
+  new APIError("Invalid Token, Please login again.", 401);
 const handleTokenExpiredError = () =>
-  new ApiError("Expired Token, Please login again.", 401);
+  new APIError("Expired Token, Please login again.", 401);
 const sendErrorDev = (err, res) =>
   res.status(err.statusCode).json({
     status: err.status,

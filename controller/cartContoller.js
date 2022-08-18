@@ -1,5 +1,5 @@
 const asyncHandler = require("express-async-handler");
-const ApiError = require("../utils/apiErorr");
+const APIError = require("../utils/APIError");
 
 const Product = require("../model/productModel");
 const Coupon = require("../model/couponModel");
@@ -112,7 +112,7 @@ exports.getLoggedUserCart = asyncHandler(async (req, res, next) => {
 
   if (!cart) {
     return next(
-      new ApiError(`There is no cart for this user id : ${req.user._id}`, 404)
+      new APIError(`There is no cart for this user id : ${req.user._id}`, 404)
     );
   }
 
@@ -160,7 +160,7 @@ exports.clearCart = asyncHandler(async (req, res, next) => {
 exports.updateItemQuantity = asyncHandler(async (req, res, next) => {
   const { quantity } = req.body;
   const cart = await Cart.findOne({ user: req.user._id });
-  if (!cart) return next(new ApiError("Not Founded cart select items", 404));
+  if (!cart) return next(new APIError("Not Founded cart select items", 404));
 
   const productIndex = cart.cartItems.findIndex(
     (item) => item._id.toString() === req.params.itemId
@@ -171,7 +171,7 @@ exports.updateItemQuantity = asyncHandler(async (req, res, next) => {
     cartItem.quantity = quantity;
     cart.cartItems[productIndex] = cartItem;
   } else {
-    return next(new ApiError("No item for this select again.", 404));
+    return next(new APIError("No item for this select again.", 404));
   }
   calculateTotalPrice(cart);
   await cart.save();
@@ -194,14 +194,14 @@ exports.applyCoupon = asyncHandler(async (req, res, next) => {
   });
 
   if (!coupon) {
-    return next(new ApiError(`Coupon is invalid or expired`, 404));
+    return next(new APIError(`Coupon is invalid or expired`, 404));
   }
 
   // 2) Get logged user cart to get total cart price
   const cart = await Cart.findOne({ user: req.user._id });
 
   if (!cart) {
-    return next(new ApiError(`No Cart is found`, 404));
+    return next(new APIError(`No Cart is found`, 404));
   }
   const totalPrice = cart.totalCartPrice;
 

@@ -3,10 +3,10 @@ const sharp = require("sharp");
 const bcrypt = require("bcryptjs");
 
 const { v4: uuidv4 } = require("uuid");
-const ApiError = require("../utils/apiErorr");
+const APIError = require("../utils/APIError");
 const User = require("../model/userModel");
 const Factory = require("./handlerFactory");
-const { uploadSingleImage } = require("../middlewares/uploadImageMiddelware");
+const { uploadSingleImage } = require("../middlewares/uploadImageMiddleware");
 const generateToken = require("../utils/generateToken");
 
 // filter requests body
@@ -52,7 +52,7 @@ exports.getUser = Factory.getOne(User);
 */
 
 exports.updateUser = asyncHandler(async (req, res, next) => {
-  const filtrObj = filterObj(
+  const filterBody = filterObj(
     req.body,
     "name",
     "phone",
@@ -61,12 +61,12 @@ exports.updateUser = asyncHandler(async (req, res, next) => {
     "role",
     "active"
   );
-  const user = await User.findByIdAndUpdate(req.params.id, filtrObj, {
+  const user = await User.findByIdAndUpdate(req.params.id, filterBody, {
     new: true,
   });
 
   if (!user) {
-    return next(new ApiError(`No User for this id${req.params.id}`, 400));
+    return next(new APIError(`No User for this id: ${req.params.id}`, 400));
   }
   res.status(200).json({ data: user });
 });
@@ -89,7 +89,7 @@ exports.changeUserPassword = asyncHandler(async (req, res, next) => {
   );
 
   if (!user) {
-    return next(new ApiError(`No User for this id${req.params.id}`, 400));
+    return next(new APIError(`No User for this id${req.params.id}`, 400));
   }
   res.status(200).json({ data: user });
 });
@@ -118,7 +118,7 @@ exports.getLoggedUserData = asyncHandler(async (req, res, next) => {
     @route  PUT   /api/v1/users/updateMyPassword
     @access Private/protect  
 */
-exports.updateLoggedUserPassowrd = asyncHandler(async (req, res, next) => {
+exports.updateLoggedUserPassword = asyncHandler(async (req, res, next) => {
   const user = await User.findByIdAndUpdate(
     req.user._id,
     {
@@ -130,7 +130,7 @@ exports.updateLoggedUserPassowrd = asyncHandler(async (req, res, next) => {
     }
   );
 
-  const token = generateToken(user._id, process.env.JWT_EXPIRE_TIME);
+  const token = generateToken(user._id, process.env.JWT_EXPIRE_TIME, res);
   res.status(200).json({ data: user, token });
 });
 
@@ -140,8 +140,14 @@ exports.updateLoggedUserPassowrd = asyncHandler(async (req, res, next) => {
 */
 
 exports.updateLoggedUserData = asyncHandler(async (req, res, next) => {
-  const filtrObj = filterObj(req.body, "name", "phone", "email", "profileImg");
-  const user = await User.findByIdAndUpdate(req.user._id, filtrObj, {
+  const filterBody = filterObj(
+    req.body,
+    "name",
+    "phone",
+    "email",
+    "profileImg"
+  );
+  const user = await User.findByIdAndUpdate(req.user._id, filterBody, {
     new: true,
   });
   res.status(200).json({ data: user });
