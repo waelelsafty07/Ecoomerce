@@ -1,6 +1,7 @@
 const asyncHandler = require("express-async-handler");
 
 const User = require("../model/userModel");
+const { sendSuccess } = require("../utils/sendResponse");
 
 // @desc    Add address to user addresses list
 // @route   POST /api/v1/addresses
@@ -15,10 +16,8 @@ exports.addAddress = asyncHandler(async (req, res, next) => {
     { new: true }
   );
 
-  res.status(200).json({
-    status: "success",
-    message: "Address added successfully.",
-    data: user.addresses,
+  sendSuccess(user.addresses, 200, res, {
+    message: "Addresses added successfully.",
   });
 });
 
@@ -35,10 +34,8 @@ exports.removeAddress = asyncHandler(async (req, res, next) => {
     { new: true }
   );
 
-  res.status(200).json({
-    status: "success",
-    message: "Address removed successfully.",
-    data: user.addresses,
+  sendSuccess(user.addresses, 200, res, {
+    message: "Addresses removed successfully.",
   });
 });
 
@@ -48,9 +45,5 @@ exports.removeAddress = asyncHandler(async (req, res, next) => {
 exports.getLoggedUserAddresses = asyncHandler(async (req, res, next) => {
   const user = await User.findById(req.user._id).populate("addresses");
 
-  res.status(200).json({
-    status: "success",
-    results: user.addresses.length,
-    data: user.addresses,
-  });
+  sendSuccess(user.addresses, 200, res, { results: user.addresses.length });
 });

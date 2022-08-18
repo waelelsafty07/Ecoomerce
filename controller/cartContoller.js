@@ -1,6 +1,6 @@
 const asyncHandler = require("express-async-handler");
 const APIError = require("../utils/APIError");
-
+const { sendSuccess } = require("../utils/sendResponse");
 const Product = require("../model/productModel");
 const Coupon = require("../model/couponModel");
 const Cart = require("../model/cartModel");
@@ -95,11 +95,9 @@ exports.addProductToCart = asyncHandler(async (req, res, next) => {
   calculateTotalPrice(cart);
   await cart.save();
 
-  res.status(200).json({
-    status: "success",
+  sendSuccess(cart, 200, res, {
     message: "Product added to cart successfully",
     numOfCartItems: cart.cartItems.length,
-    data: cart,
   });
 });
 
@@ -116,10 +114,8 @@ exports.getLoggedUserCart = asyncHandler(async (req, res, next) => {
     );
   }
 
-  res.status(200).json({
-    status: "success",
+  sendSuccess(cart, 200, res, {
     numOfCartItems: cart.cartItems.length,
-    data: cart,
   });
 });
 
@@ -138,10 +134,8 @@ exports.removeCartItem = asyncHandler(async (req, res, next) => {
   calculateTotalPrice(cart);
   cart.save();
 
-  res.status(200).json({
-    status: "success",
+  sendSuccess(cart, 200, res, {
     numOfCartItems: cart.cartItems.length,
-    data: cart,
   });
 });
 
@@ -150,7 +144,7 @@ exports.removeCartItem = asyncHandler(async (req, res, next) => {
 // @access  Private/User
 exports.clearCart = asyncHandler(async (req, res, next) => {
   await Cart.findOneAndDelete({ user: req.user._id });
-  res.status(204).send();
+  sendSuccess(null, 204, res);
 });
 
 // @desc    update quantity item of cartItems
@@ -175,11 +169,9 @@ exports.updateItemQuantity = asyncHandler(async (req, res, next) => {
   }
   calculateTotalPrice(cart);
   await cart.save();
-  res.status(200).json({
-    status: "success",
-    message: "Product added to cart successfully",
+  sendSuccess(cart, 200, res, {
+    message: "Cart item updated successfully",
     numOfCartItems: cart.cartItems.length,
-    data: cart,
   });
 });
 
@@ -214,9 +206,7 @@ exports.applyCoupon = asyncHandler(async (req, res, next) => {
   cart.totalPriceAfterDiscount = totalPriceAfterDiscount;
   await cart.save();
 
-  res.status(200).json({
-    status: "success",
+  sendSuccess(cart, 200, res, {
     numOfCartItems: cart.cartItems.length,
-    data: cart,
   });
 });

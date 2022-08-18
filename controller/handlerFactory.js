@@ -1,6 +1,7 @@
 const asyncHandler = require("express-async-handler");
 const APIError = require("../utils/APIError");
 const APIFeatures = require("../utils/APIFeatures");
+const { sendSuccess } = require("../utils/sendResponse");
 
 exports.deleteOne = (Model) =>
   asyncHandler(async (req, res, next) => {
@@ -11,7 +12,7 @@ exports.deleteOne = (Model) =>
       return next(new APIError(`No brand for this id${id}`, 400));
     }
     document.remove();
-    res.status(204).send();
+    sendSuccess(null, 204, res);
   });
 exports.updateOne = (Model) =>
   asyncHandler(async (req, res, next) => {
@@ -23,13 +24,13 @@ exports.updateOne = (Model) =>
       return next(new APIError(`No Document for this id${req.params.id}`, 400));
     }
     document.save();
-    res.status(200).json({ data: document });
+    sendSuccess(document, 200, res);
   });
 
 exports.createOne = (Model) =>
   asyncHandler(async (req, res, next) => {
     const document = await Model.create(req.body);
-    res.status(201).json({ data: document });
+    sendSuccess(document, 201, res);
   });
 
 exports.getOne = (Model, populateOpt) =>
@@ -43,7 +44,8 @@ exports.getOne = (Model, populateOpt) =>
     if (!document) {
       return next(new APIError(`No Document for this id ${id}`, 404));
     }
-    res.status(200).json({ data: document });
+
+    sendSuccess(document, 200, res);
   });
 
 exports.getAll = (Model, modelName = "") =>
@@ -75,7 +77,8 @@ exports.getAll = (Model, modelName = "") =>
       }
     }
 
-    res
-      .status(200)
-      .json({ results: documents.length, paginationResult, data: documents });
+    sendSuccess(documents, 200, res, {
+      results: documents.length,
+      paginationResult,
+    });
   });
