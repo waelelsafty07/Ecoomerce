@@ -16,14 +16,20 @@ const {
   updateProductValidator,
   deleteProductValidator,
 } = require("../utils/validators/productValidator");
-const { protect, restrictTo } = require("../controller/authController");
+
+const {
+  protect,
+  restrictTo,
+  isLoginUser,
+} = require("../controller/authController");
+
 const reviewRoutes = require("./reviewRoutes");
 
 const router = express.Router({ mergeParams: true });
 router.use("/:productId/reviews", reviewRoutes);
 router
   .route("/")
-  .get(filterobj, getProducts)
+  .get(isLoginUser, filterobj, getProducts)
   .post(
     protect,
     restrictTo("admin", "manager"),

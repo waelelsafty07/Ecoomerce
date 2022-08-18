@@ -1,5 +1,5 @@
 const multer = require("multer");
-const ApiError = require("../utils/apiErorr");
+const APIError = require("../utils/APIError");
 
 const multerOptions = () => {
   const storage = multer.memoryStorage();
@@ -7,7 +7,7 @@ const multerOptions = () => {
   const multerFilter = function (req, file, cb) {
     if (file.mimetype.startsWith("image")) {
       cb(null, true);
-    } else cb(new ApiError("Only Images allowed", 400), false);
+    } else cb(new APIError("Only Images allowed", 400), false);
   };
   const upload = multer({ storage: storage, fileFilter: multerFilter });
   return upload;

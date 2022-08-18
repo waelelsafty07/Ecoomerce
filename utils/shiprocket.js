@@ -2,7 +2,7 @@
 /* eslint-disable no-throw-literal */
 const axios = require("axios");
 const RandExp = require("randexp");
-const ApiError = require("./apiErorr");
+// const APIError = require("./APIError");
 
 class ShipRocket {
   constructor(token) {

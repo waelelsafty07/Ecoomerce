@@ -1,6 +1,6 @@
 const asyncHandler = require("express-async-handler");
-const ApiError = require("../utils/apiErorr");
-const ApiFeatures = require("../utils/apiFeaturs");
+const APIError = require("../utils/APIError");
+const APIFeatures = require("../utils/APIFeatures");
 
 exports.deleteOne = (Model) =>
   asyncHandler(async (req, res, next) => {
@@ -8,7 +8,7 @@ exports.deleteOne = (Model) =>
     const document = await Model.findByIdAndDelete(id);
 
     if (!document) {
-      return next(new ApiError(`No brand for this id${id}`, 400));
+      return next(new APIError(`No brand for this id${id}`, 400));
     }
     document.remove();
     res.status(204).send();
@@ -20,7 +20,7 @@ exports.updateOne = (Model) =>
     });
 
     if (!document) {
-      return next(new ApiError(`No Document for this id${req.params.id}`, 400));
+      return next(new APIError(`No Document for this id${req.params.id}`, 400));
     }
     document.save();
     res.status(200).json({ data: document });
@@ -41,7 +41,7 @@ exports.getOne = (Model, populateOpt) =>
     }
     const document = await query;
     if (!document) {
-      return next(new ApiError(`No Document for this id ${id}`, 404));
+      return next(new APIError(`No Document for this id ${id}`, 404));
     }
     res.status(200).json({ data: document });
   });
@@ -54,7 +54,7 @@ exports.getAll = (Model, modelName = "") =>
     }
     // Build query
     const documentsCounts = await Model.countDocuments();
-    const apiFeatures = new ApiFeatures(Model.find(filter), req.query)
+    const APIFeature = new APIFeatures(Model.find(filter), req.query)
       .paginate(documentsCounts)
       .filter()
       .search(modelName)
@@ -62,8 +62,18 @@ exports.getAll = (Model, modelName = "") =>
       .sort();
 
     // Execute query
-    const { mongooseQuery, paginationResult } = apiFeatures;
-    const documents = await mongooseQuery;
+    const { mongooseQuery, paginationResult } = APIFeature;
+    let documents = await mongooseQuery;
+
+    if (modelName === "Products") {
+      if (res.locals.user) {
+        const userWishlist = res.locals.user.wishlist;
+        documents = documents.map((doc) => {
+          if (userWishlist.includes(doc._id)) doc.isFav = true;
+          return doc;
+        });
+      }
+    }
 
     res
       .status(200)

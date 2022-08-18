@@ -9,7 +9,7 @@ const productSchema = new mongoose.Schema(
       minlength: [3, "Too short product title"],
       maxlength: [100, "Too long product title"],
     },
-    tags: String,
+    tags: [String],
     COD: { type: Boolean, default: false },
     isFav: { type: Boolean, default: false },
     multiple_tax: String,
@@ -107,6 +107,13 @@ productSchema.virtual("reviews", {
   localField: "_id",
 });
 
+// populate users that wishlist this product
+// productSchema.virtual("users", {
+//   ref: "User",
+//   foreignField: "wishlist",
+//   localField: "_id",
+// });
+
 const setImageURL = (doc) => {
   if (doc.imageCover) {
     const imageUrl = `${process.env.BASE_URL}/products/${doc.imageCover}`;
@@ -121,6 +128,7 @@ const setImageURL = (doc) => {
     doc.images = imagesList;
   }
 };
+
 // findOne, findAll and update
 productSchema.post("init", (doc) => {
   setImageURL(doc);

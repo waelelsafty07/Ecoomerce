@@ -5,7 +5,7 @@ dotenv.config();
 const stripe = require("stripe")(process.env.STRIPE_SECRET);
 const asyncHandler = require("express-async-handler");
 const factory = require("./handlerFactory");
-const ApiError = require("../utils/apiErorr");
+const APIError = require("../utils/APIError");
 const ShipRocket = require("../utils/shiprocket");
 
 const User = require("../model/userModel");
@@ -39,7 +39,7 @@ exports.createCashOrder = asyncHandler(async (req, res, next) => {
 
   // get cart depend on cart ID
   const cart = await Cart.findById(req.params.cartId);
-  if (!cart) return next(new ApiError("No cart with this id", 404));
+  if (!cart) return next(new APIError("No cart with this id", 404));
   // Get cash order price depend on cart user
   const cartPrice = cart.totalPriceAfterDiscount
     ? cart.totalPriceAfterDiscount
@@ -137,7 +137,7 @@ exports.updateOrderToPaid = asyncHandler(async (req, res, next) => {
   const order = await Order.findById(req.params.id);
   if (!order) {
     return next(
-      new ApiError(
+      new APIError(
         `There is no such a order with this id:${req.params.id}`,
         404
       )
@@ -161,7 +161,7 @@ exports.updateOrderToDelivered = asyncHandler(async (req, res, next) => {
   const order = await Order.findById(req.params.id);
   if (!order) {
     return next(
-      new ApiError(
+      new APIError(
         `There is no such a order with this id:${req.params.id}`,
         404
       )
@@ -191,7 +191,7 @@ exports.checkoutSession = asyncHandler(async (req, res, next) => {
   const cart = await Cart.findById(req.params.cartId);
   if (!cart) {
     return next(
-      new ApiError(`There is no such cart with id ${req.params.cartId}`, 404)
+      new APIError(`There is no such cart with id ${req.params.cartId}`, 404)
     );
   }
 
