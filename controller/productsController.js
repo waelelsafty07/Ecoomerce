@@ -1,12 +1,14 @@
 const asyncHandler = require("express-async-handler");
-
 const sharp = require("sharp");
 const { v4: uuidv4 } = require("uuid");
+const nodeXlsx = require("node-xlsx");
 
 const Product = require("../model/productModel");
 const Factory = require("./handlerFactory");
 
 const { uploadMixOfImages } = require("../middlewares/uploadImageMiddleware");
+const { uploadExcelFile } = require("../middlewares/uploadExcelFileMiddleware");
+const { sendSuccess } = require("../utils/sendResponse");
 
 exports.uploadProductImages = uploadMixOfImages([
   {
@@ -17,7 +19,6 @@ exports.uploadProductImages = uploadMixOfImages([
 ]);
 
 exports.resizeProductImages = asyncHandler(async (req, res, next) => {
-  console.log(req.files);
   if (req.files.imageCover) {
     const imageCoverFileName = `product-${uuidv4()}-${Date.now()}-cover.webp`;
     await sharp(req.files.imageCover[0].buffer)
@@ -81,3 +82,33 @@ exports.deleteProduct = Factory.deleteOne(Product);
     @access Private/admin or manager  
 */
 exports.createProduct = Factory.createOne(Product);
+
+exports.uploadExcelFile = uploadExcelFile;
+
+exports.storeExcelFile = asyncHandler(async (req, res, next) => {
+  const sheet = nodeXlsx.parse(req.file.buffer)[0].data;
+  const keys = sheet[0];
+  const values = sheet.slice(1);
+
+  const products = [];
+  for (let j = 0; j < values.length; j += 1) {
+    products[j] = {};
+    for (let i = 0; i < keys.length; i += 1) {
+      if (
+        keys[i] === "tags" ||
+        keys[i] === "images" ||
+        keys[i] === "colors" ||
+        keys[i] === "subcategories" ||
+        keys[i] === "sizes"
+      )
+        values[j][i] = values[j][i].toString().split(",");
+      products[j][keys[i]] = values[j][i];
+    }
+  }
+  products.forEach(async (product) => {
+    await Product(product).save({ validateBeforeSave: false });
+  });
+  sendSuccess(products, 201, res, {
+    message: "Products created from excel sheet successfully",
+  });
+});

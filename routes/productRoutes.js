@@ -1,5 +1,4 @@
 const express = require("express");
-
 const {
   createProduct,
   getProducts,
@@ -9,6 +8,8 @@ const {
   uploadProductImages,
   resizeProductImages,
   filterobj,
+  uploadExcelFile,
+  storeExcelFile,
 } = require("../controller/productsController");
 const {
   getProductValidator,
@@ -55,4 +56,13 @@ router
     deleteProductValidator,
     deleteProduct
   );
+
+router.post(
+  "/storeExcelFile",
+  protect,
+  restrictTo("admin", "manager"),
+  uploadExcelFile,
+  storeExcelFile
+);
+
 module.exports = router;

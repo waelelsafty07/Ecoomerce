@@ -1,6 +1,5 @@
 const asyncHandler = require("express-async-handler");
 const sharp = require("sharp");
-const { Parser } = require("json2csv");
 const { v4: uuidv4 } = require("uuid");
 const Category = require("../model/categoryModel");
 const Factory = require("./handlerFactory");
@@ -30,15 +29,6 @@ exports.resizeCategoryImage = asyncHandler(async (req, res, next) => {
     @access Public  
 */
 
-exports.exportData = asyncHandler(async (req, res, next) => {
-  const fields = ["name", "priority", "image"];
-  const data = await Category.find();
-  const csv = new Parser({ data, fields: fields });
-  res.set("Content-Disposition", "attachment;filename=authors.csv");
-  res.set("Content-Type", "application/octet-stream");
-
-  res.send(csv);
-});
 
 exports.getCategories = Factory.getAll(Category);
 

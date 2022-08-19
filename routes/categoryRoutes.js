@@ -8,7 +8,6 @@ const {
   deleteCategory,
   uploadCategoryImage,
   resizeCategoryImage,
-  exportData,
 } = require("../controller/categoriesController");
 const { protect, restrictTo } = require("../controller/authController");
 const {
@@ -21,7 +20,6 @@ const subCategoryRoutes = require("./subCategoryRoutes");
 const productsRoutes = require("./productRoutes");
 
 const router = express.Router();
-router.route("/exportData").get(exportData);
 router.use("/:categoryId/subcategories", subCategoryRoutes);
 router.use("/:categoryId/products", productsRoutes);
 router
