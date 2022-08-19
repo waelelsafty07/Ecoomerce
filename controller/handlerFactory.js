@@ -33,7 +33,7 @@ exports.createOne = (Model) =>
     sendSuccess(document, 201, res);
   });
 
-exports.getOne = (Model, populateOpt) =>
+exports.getOne = (Model, populateOpt, modelName = "") =>
   asyncHandler(async (req, res, next) => {
     const { id } = req.params;
     let query = await Model.findById(id);
@@ -44,7 +44,12 @@ exports.getOne = (Model, populateOpt) =>
     if (!document) {
       return next(new APIError(`No Document for this id ${id}`, 404));
     }
-
+    if (modelName === "Products") {
+      if (res.locals.user) {
+        const userWishlist = res.locals.user.wishlist;
+        if (userWishlist.includes(document._id)) document.isFav = true;
+      }
+    }
     sendSuccess(document, 200, res);
   });
 
@@ -70,9 +75,9 @@ exports.getAll = (Model, modelName = "") =>
     if (modelName === "Products") {
       if (res.locals.user) {
         const userWishlist = res.locals.user.wishlist;
-        documents = documents.map((doc) => {
-          if (userWishlist.includes(doc._id)) doc.isFav = true;
-          return doc;
+        documents = documents.map((document) => {
+          if (userWishlist.includes(document._id)) document.isFav = true;
+          return document;
         });
       }
     }

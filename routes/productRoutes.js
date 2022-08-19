@@ -40,7 +40,7 @@ router
   );
 router
   .route("/:id")
-  .get(getProductValidator, getProduct)
+  .get(isLoginUser, getProductValidator, getProduct)
   .put(
     protect,
     restrictTo("admin", "manager"),

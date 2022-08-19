@@ -42,6 +42,9 @@ exports.removeProductToWishlist = asyncHandler(async (req, res, next) => {
 // @access  Protect / user
 exports.getLoggedUserWishlist = asyncHandler(async (req, res, next) => {
   const user = await User.findById(req.user._id).populate("wishlist");
-
+  user.wishlist = user.wishlist.map((product) => {
+    product.isFav = true;
+    return product;
+  });
   sendSuccess(user.wishlist, 200, res, { results: user.wishlist.length });
 });
